@@ -1,0 +1,290 @@
+<title>Кто Импостер?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: a game table — one big card in the middle, poster as a separate A4-like sheet */
+:root{
+  --bg:#E4F2EC; --surface:#FFFFFF; --ink:#1D2B4F; --muted:#5A6888;
+  --sun:#FFD23F; --sky:#3A6FF7; --red:#E5484D; --leaf:#2BA36B; --line:#C9DCD5;
+  --p1:#3A6FF7; --p2:#2BA36B; --p3:#F08A24;
+  --display:"Balsamiq Sans","Comic Sans MS","Trebuchet MS",sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111A2E; --surface:#1C2742; --ink:#EEF2FF; --muted:#A3AFCC;
+  --sun:#FFD23F; --sky:#6F95FF; --red:#FF6B6F; --leaf:#4BC98A; --line:#2E3B5C;
+  --p1:#6F95FF; --p2:#4BC98A; --p3:#FFA552; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111A2E; --surface:#1C2742; --ink:#EEF2FF; --muted:#A3AFCC;
+  --sun:#FFD23F; --sky:#6F95FF; --red:#FF6B6F; --leaf:#4BC98A; --line:#2E3B5C;
+  --p1:#6F95FF; --p2:#4BC98A; --p3:#FFA552; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{font-size:clamp(28px,6vw,40px);font-weight:700}
+.logo span{color:var(--red)}
+.tabs{display:flex;gap:6px;background:var(--surface);padding:5px;border-radius:999px;border:2px solid var(--line)}
+.tabs button{border:0;background:transparent;color:var(--ink);padding:8px 18px;border-radius:999px;font-weight:800}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+
+.panel{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px;flex:1 1 160px;min-width:0}
+.field label{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select{font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+.btn{border:0;border-radius:16px;padding:14px 22px;font-weight:800;font-size:18px;background:var(--sun);color:#1D2B4F;box-shadow:0 4px 0 #C99A00;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C99A00}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:2px solid var(--line)}
+.btn.red{background:var(--red);color:#fff;box-shadow:0 4px 0 #9E2629}
+
+/* stage */
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding-block:10px}
+.who{font-family:var(--display);font-size:clamp(24px,5vw,32px);font-weight:700}
+.hint{color:var(--muted);max-width:42ch;margin:0}
+.progress{display:flex;gap:8px}
+.progress i{width:34px;height:8px;border-radius:4px;background:var(--line)}
+.progress i.done{background:var(--leaf)}
+.progress i.now{background:var(--sun)}
+
+.card{width:min(280px,80vw);aspect-ratio:3/4;max-width:100%;perspective:1000px;border:0;background:none;padding:0}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:24px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;border:4px solid var(--ink)}
+.back{background:repeating-linear-gradient(45deg,var(--sky) 0 14px,#2F5FD9 14px 28px);color:#fff}
+.back b{font-family:var(--display);font-size:64px;line-height:1;background:var(--ink);color:var(--sun);width:110px;height:110px;border-radius:50%;display:grid;place-items:center}
+.back small{font-weight:800;font-size:16px;background:var(--ink);padding:4px 12px;border-radius:999px}
+.front{transform:rotateY(180deg);background:var(--sun);color:#1D2B4F}
+.front .pic{font-size:88px;line-height:1}
+.front .word{font-family:var(--display);font-size:clamp(28px,7vw,38px);font-weight:700}
+.front .sub{font-weight:700;font-size:14px;opacity:.75}
+.front.imp{background:var(--red);color:#fff}
+
+.result{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.mini{width:120px;border-radius:16px;border:3px solid var(--ink);padding:12px 8px;background:var(--sun);color:#1D2B4F;display:flex;flex-direction:column;gap:2px;align-items:center}
+.mini.imp{background:var(--red);color:#fff}
+.mini .n{font-weight:800;font-size:14px}
+.mini .e{font-size:36px}
+.mini .w{font-family:var(--display);font-weight:700}
+
+details{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:14px 20px}
+summary{font-weight:800;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-size:15px}
+
+/* poster */
+.poster{background:#FFF8D6;color:#1D2B4F;border:4px solid #1D2B4F;border-radius:8px;width:100%;max-width:640px;margin:0 auto;padding:clamp(18px,5vw,40px);display:flex;flex-direction:column;gap:22px;position:relative;overflow:hidden}
+.poster::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 8%,#FFD23F 0 60px,transparent 61px),radial-gradient(circle at 95% 92%,#3A6FF7 0 80px,transparent 81px);opacity:.35;pointer-events:none}
+.poster > *{position:relative}
+.p-title{text-align:center;display:flex;flex-direction:column;gap:6px}
+.p-title small{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:13px}
+.p-title h2{font-size:clamp(40px,10vw,68px);line-height:.95}
+.p-title h2 span{color:#E5484D}
+.p-title p{margin:0;font-weight:700}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,2vw,16px)}
+.pl{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.head{width:clamp(56px,14vw,84px);aspect-ratio:1;border-radius:50%;border:3px solid #1D2B4F;position:relative}
+.head::before,.head::after{content:"";position:absolute;top:38%;width:12%;height:16%;border-radius:50%;background:#1D2B4F}
+.head::before{left:28%}.head::after{right:28%}
+.pc{width:100%;aspect-ratio:3/4;border:3px solid #1D2B4F;border-radius:14px;background:#FFD23F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;text-align:center}
+.pc.imp{background:#E5484D;color:#fff}
+.pc .e{font-size:clamp(28px,8vw,46px);line-height:1}
+.pc .w{font-family:var(--display);font-weight:700;font-size:clamp(13px,3.4vw,19px);overflow-wrap:anywhere}
+.pname{font-family:var(--display);font-weight:700;font-size:clamp(14px,3.6vw,20px);text-align:center;overflow-wrap:anywhere}
+.steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.steps li{display:flex;gap:12px;align-items:flex-start;background:#fff;border:3px solid #1D2B4F;border-radius:14px;padding:10px 14px;font-weight:600}
+.steps b.num{flex:none;width:32px;height:32px;border-radius:50%;background:#1D2B4F;color:#FFD23F;display:grid;place-items:center;font-family:var(--display)}
+.win{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.win div{border:3px dashed #1D2B4F;border-radius:14px;padding:10px 12px;font-weight:700;font-size:15px}
+.win h3{font-size:18px;margin-bottom:2px}
+.p-places{text-align:center;font-weight:700;font-size:15px}
+.p-places span{display:inline-block;background:#fff;border:2px solid #1D2B4F;border-radius:999px;padding:2px 10px;margin:3px}
+.note{color:var(--muted);text-align:center;font-size:14px;margin:0}
+@media (max-width:480px){.win{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.card-inner{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="logo">Кто <span>Импостер</span>?</div>
+    <div class="tabs" role="tablist">
+      <button id="tab-game" role="tab" aria-selected="true">Игра</button>
+      <button id="tab-poster" role="tab" aria-selected="false">Постер</button>
+    </div>
+  </header>
+
+  <!-- GAME -->
+  <section id="view-game" class="wrap" style="gap:20px">
+    <div class="panel" id="setup">
+      <div class="row">
+        <div class="field"><label for="n1"><span class="dot" style="background:var(--p1)"></span>Игрок 1</label><input id="n1" value="Аня" maxlength="14"></div>
+        <div class="field"><label for="n2"><span class="dot" style="background:var(--p2)"></span>Игрок 2</label><input id="n2" value="Миша" maxlength="14"></div>
+        <div class="field"><label for="n3"><span class="dot" style="background:var(--p3)"></span>Игрок 3</label><input id="n3" value="Соня" maxlength="14"></div>
+      </div>
+      <div class="row" style="align-items:flex-end">
+        <div class="field"><label for="theme">Тема</label>
+          <select id="theme"></select></div>
+        <button class="btn" id="start" style="flex:1 1 200px">Начать раунд</button>
+      </div>
+    </div>
+
+    <div class="panel stage" id="stage" hidden>
+      <div class="progress" id="prog"><i></i><i></i><i></i></div>
+      <div class="who" id="who"></div>
+      <p class="hint" id="hint"></p>
+      <button class="card" id="card" aria-label="Перевернуть карточку">
+        <div class="card-inner">
+          <div class="face back"><b>?</b><small>Нажми, чтобы открыть</small></div>
+          <div class="face front" id="front"><div class="pic" id="pic"></div><div class="word" id="word"></div><div class="sub" id="sub"></div></div>
+        </div>
+      </button>
+      <button class="btn" id="next" hidden>Спрятать и передать</button>
+    </div>
+
+    <div class="panel stage" id="talk" hidden>
+      <div class="who">Все посмотрели!</div>
+      <p class="hint">По очереди скажите одно слово про место. Импостер не знает, где вы, поэтому слушает и угадывает. Потом на счёт «три» покажите пальцем, кто импостер.</p>
+      <div class="row" style="justify-content:center">
+        <button class="btn red" id="reveal">Показать ответ</button>
+      </div>
+    </div>
+
+    <div class="panel stage" id="answer" hidden>
+      <div class="who" id="ansTitle"></div>
+      <div class="result" id="result"></div>
+      <p class="hint">Импостер, а ты угадал место? Если да, ты тоже победил!</p>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="again">Новый раунд</button>
+        <button class="btn ghost" id="toSetup">Сменить игроков</button>
+      </div>
+    </div>
+
+    <details>
+      <summary>Все места в игре</summary>
+      <div class="chips" id="allPlaces"></div>
+    </details>
+  </section>
+
+  <!-- POSTER -->
+  <section id="view-poster" hidden>
+    <div class="poster" id="poster">
+      <div class="p-title">
+        <small>Игра для троих · от 5 лет</small>
+        <h2>Кто<br><span>Импостер?</span></h2>
+        <p>Двое знают место. Один притворяется.</p>
+      </div>
+      <div class="trio" id="trio"></div>
+      <ol class="steps">
+        <li><b class="num">1</b><span>Каждый по очереди тайно смотрит свою карточку. На двух карточках одно и то же место, на одной написано <b>ИМПОСТЕР</b>.</span></li>
+        <li><b class="num">2</b><span>По кругу каждый говорит одно слово про место. Например, для <b>Аптеки</b>: «таблетки».</span></li>
+        <li><b class="num">3</b><span>Импостер слушает и делает вид, что тоже знает место.</span></li>
+        <li><b class="num">4</b><span>На счёт «раз, два, три» все показывают пальцем на импостера.</span></li>
+      </ol>
+      <div class="win">
+        <div><h3>Игроки побеждают</h3>если нашли импостера.</div>
+        <div><h3>Импостер побеждает</h3>если его не нашли или он угадал место.</div>
+      </div>
+      <div class="p-places">Места: <span>🏫 Школа</span><span>🏥 Больница</span><span>🏋️ Спортзал</span><span>💊 Аптека</span><span>🦁 Зоопарк</span><span>🏖️ Пляж</span><span>🎪 Цирк</span><span>🛒 Магазин</span></div>
+    </div>
+    <p class="note" style="margin-top:12px">Имена на постере берутся из вкладки «Игра». Чтобы распечатать, сделайте скриншот постера.</p>
+  </section>
+</div>
+
+<script>
+const PLACES = {
+  "Город": [["Школа","🏫"],["Больница","🏥"],["Спортзал","🏋️"],["Аптека","💊"],["Магазин","🛒"],["Библиотека","📚"],["Почта","📮"],["Пекарня","🥐"],["Кафе","☕"],["Парикмахерская","💇"],["Детский сад","🧸"],["Пожарная часть","🚒"]],
+  "Отдых": [["Зоопарк","🦁"],["Парк","🌳"],["Цирк","🎪"],["Кинотеатр","🎬"],["Пляж","🏖️"],["Бассейн","🏊"],["Каток","⛸️"],["Музей","🏛️"],["Театр","🎭"],["Стадион","🏟️"]],
+  "Путешествия": [["Аэропорт","✈️"],["Вокзал","🚉"],["Автобус","🚌"],["Корабль","🚢"],["Лес","🌲"],["Ферма","🐄"],["Горы","🏔️"],["Космос","🚀"]]
+};
+const ALL = Object.values(PLACES).flat();
+const $ = id => document.getElementById(id);
+
+const sel = $("theme");
+sel.innerHTML = `<option value="all">Все места (${ALL.length})</option>` +
+  Object.entries(PLACES).map(([k,v])=>`<option value="${k}">${k} (${v.length})</option>`).join("");
+$("allPlaces").innerHTML = ALL.map(([w,e])=>`<span class="chip">${e} ${w}</span>`).join("");
+
+const COLORS = ["var(--p1)","var(--p2)","var(--p3)"];
+let round = null, turn = 0, lastPlace = null;
+
+function names(){ return [1,2,3].map(i => ($("n"+i).value.trim() || "Игрок "+i)); }
+function rand(n){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+
+function newRound(){
+  const pool = sel.value === "all" ? ALL : PLACES[sel.value];
+  let p; do { p = pool[rand(pool.length)]; } while (pool.length > 1 && p === lastPlace);
+  lastPlace = p;
+  round = { place:p, imp:rand(3), names:names() };
+  turn = 0;
+  show("stage"); drawTurn();
+}
+function show(id){ ["setup","stage","talk","answer"].forEach(s => $(s).hidden = (s !== id && !(id==="stage" && s==="none"))); if(id!=="setup") $("setup").hidden = true; }
+
+function drawTurn(){
+  const card = $("card");
+  card.classList.remove("flipped");
+  $("next").hidden = true;
+  $("who").innerHTML = `<span class="dot" style="background:${COLORS[turn]};width:16px;height:16px"></span>${round.names[turn]}, твоя карточка`;
+  $("hint").textContent = "Остальные, отвернитесь! Нажми на карточку, чтобы посмотреть.";
+  [...$("prog").children].forEach((el,i)=> el.className = i<turn ? "done" : i===turn ? "now" : "");
+  setTimeout(()=>{
+    const isImp = turn === round.imp;
+    $("front").classList.toggle("imp", isImp);
+    $("pic").textContent = isImp ? "🕵️" : round.place[1];
+    $("word").textContent = isImp ? "ИМПОСТЕР" : round.place[0];
+    $("sub").textContent = isImp ? "Ты не знаешь место. Слушай и угадывай!" : "Не говори это слово вслух!";
+  }, 260);
+}
+
+$("card").addEventListener("click", () => {
+  const c = $("card");
+  if (c.classList.contains("flipped")) return;
+  c.classList.add("flipped");
+  $("hint").textContent = "Запомни и нажми кнопку ниже.";
+  $("next").hidden = false;
+  $("next").textContent = turn < 2 ? `Спрятать и передать: ${round.names[turn+1]}` : "Спрятать, все посмотрели";
+});
+$("next").addEventListener("click", () => {
+  if (turn < 2){ turn++; $("card").classList.remove("flipped"); $("next").hidden = true; setTimeout(drawTurn, 280); }
+  else { $("card").classList.remove("flipped"); show("talk"); }
+});
+$("reveal").addEventListener("click", () => {
+  $("ansTitle").textContent = `Импостер: ${round.names[round.imp]}!`;
+  $("result").innerHTML = round.names.map((n,i)=>{
+    const imp = i===round.imp;
+    return `<div class="mini ${imp?"imp":""}"><span class="n">${n}</span><span class="e">${imp?"🕵️":round.place[1]}</span><span class="w">${imp?"Импостер":round.place[0]}</span></div>`;
+  }).join("");
+  show("answer");
+});
+$("start").addEventListener("click", newRound);
+$("again").addEventListener("click", newRound);
+$("toSetup").addEventListener("click", () => { ["stage","talk","answer"].forEach(s=>$(s).hidden=true); $("setup").hidden=false; });
+
+/* poster */
+function drawPoster(){
+  const n = names();
+  const cards = [["Школа","🏫",false],["","🕵️",true],["Школа","🏫",false]];
+  const heads = ["#3A6FF7","#2BA36B","#F08A24"];
+  $("trio").innerHTML = n.map((nm,i)=>`<div class="pl"><div class="head" style="background:${heads[i]}"></div><div class="pname">${nm}</div><div class="pc ${cards[i][2]?"imp":""}"><span class="e">${cards[i][1]}</span><span class="w">${cards[i][2]?"ИМПОСТЕР":cards[i][0]}</span></div></div>`).join("");
+}
+["n1","n2","n3"].forEach(id => $(id).addEventListener("input", drawPoster));
+drawPoster();
+
+function tab(which){
+  const g = which==="game";
+  $("tab-game").setAttribute("aria-selected", g); $("tab-poster").setAttribute("aria-selected", !g);
+  $("view-game").hidden = !g; $("view-poster").hidden = g;
+  if(!g) drawPoster();
+}
+$("tab-game").addEventListener("click", ()=>tab("game"));
+$("tab-poster").addEventListener("click", ()=>tab("poster"));
+if (location.hash === "#poster") tab("poster");
+</script>
